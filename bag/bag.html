@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0-1背包问题 动态规划算法</title>
+    <style>
+        /* 常规样式 - 深色主题 */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            scroll-behavior: smooth;
+            background: linear-gradient(135deg, #1a1a1a, #121212);
+            color: #e0e0e0;
+        }
+
+        h1,
+        h2,
+        h3 {
+            text-align: center;
+            color: #81d4fa;
+        }
+
+        p {
+            text-align: justify;
+            padding: 0 20px;
+        }
+
+        a {
+            color: #64b5f6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* 头部区域样式 */
+        header {
+            background: linear-gradient(135deg, #263238, #212121);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        header p {
+            margin: 5px 0 0;
+        }
+
+        /* 章节样式 */
+        section {
+            padding: 40px 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            background: #1e1e1e;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+        }
+
+        section h2 {
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            background: #2e2e2e;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #81d4fa;
+        }
+
+        /* 示例区域样式 */
+        .item-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .item-card {
+            width: 250px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #424242;
+            border-radius: 10px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
+            background: #2e2e2e;
+            color: #e0e0e0;
+        }
+
+        /* 画布样式 */
+        canvas {
+            border: 1px solid #424242;
+            margin-top: 20px;
+            background-color: #121212;
+        }
+
+        #controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #solveButton {
+            background: #4caf50;
+            color: white;
+        }
+
+        #solveButton:hover {
+            background: #45a049;
+        }
+
+        #resetButton {
+            background: #f44336;
+            color: white;
+        }
+
+        #resetButton:hover {
+            background: #e53935;
+        }
+
+        /* 页脚样式 */
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #212121;
+            color: #e0e0e0;
+            margin-top: 40px;
+            border-top: 1px solid #424242;
+        }
+        #output {
+            margin-top: 20px;
+            white-space: pre-wrap; /* 保持格式 */
+        }
+        .cell {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 1px solid black;
+            text-align: center;
+            margin: 1px;
+        }
+        .selected {
+            background-color: #650460;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 头部 -->
+    <header>
+        <h1>0-1背包问题 动态规划算法</h1>
+        <p>帮助您了解经典的0-1背包问题的动态规划解法</p>
+    </header>
+
+    <!-- 简介部分 -->
+    <section>
+        <h2>什么是0-1背包问题?</h2>
+        <p>
+            给定一组物品，每个物品有其对应的重量和价值，现在有一个背包，它能够承载的最大重量是固定的。目标是从这些物品中选择一些物品放入背包，使得所选择的物品的总重量不超过背包的容量，同时使得这些物品的总价值最大化。每个物品最多选取一次
+        </p>
+        <p>该问题通常用于资源分配、融资和其他领域的决策制定。</p>
+    </section>
+
+    <!-- 应用部分 -->
+    <section>
+        <h2>背包问题的应用</h2>
+        <div class="item-container">
+            <div class="item-card">
+                <h3>资源分配</h3>
+                <p>在限制条件下分配资源以最大化收益。</p>
+            </div>
+            <div class="item-card">
+                <h3>投资组合优化</h3>
+                <p>选择投资项目以获得最大回报。</p>
+            </div>
+            <div class="item-card">
+                <h3>物流管理</h3>
+                <p>有效安排运输以提高效率。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 原理部分 -->
+    <section>
+        <h2>背包问题的解决方法</h2>
+        <p>
+            背包问题可以通过动态规划算法来解决，其基本思想是将问题分解为子问题并逐步求解：
+        </p>
+        <ol>
+            <li>定义状态： 首先，定义一个状态，用 dp[i][w] 来表示前 i 件物品中，能够放入容量为 w 的背包所能获得的最大价值。
+            </li>
+            <li>当没有物品可选时（即 i=0），不管背包容量 w 多大，最大价值都是 0。因此，dp[0][w] = 0 对于所有 w ≥ 0。
+                当背包的容量为 0 时（即 w=0），不管物品数量多少，最大价值也是 0。因此，dp[i][0] = 0 对于所有 i ≥ 0。
+                </li>
+            <li>dp[i][w] = max(dp[i-1][w], dp[i-1][w - weights[i]] + values[i]) 
+            </li>
+        </ol>
+        <p>下面的部分演示了这一过程的实际情况。</p>
+    </section>
+
+    <!-- 交互画布部分 -->
+    <section>
+        <h1>0-1背包问题动态规划可视化</h1>
+        <label for="weights">物品重量（用逗号分隔）:</label>
+        <input type="text" id="weights" value="2,3,4,5">
+        <br>
+        <label for="values">物品价值（用逗号分隔）:</label>
+        <input type="text" id="values" value="3,4,5,6">
+        <br>
+        <label for="capacity">背包容量:</label>
+        <input type="number" id="capacity" value="5">
+        <br>
+        <button onclick="knapsack()">计算背包问题</button>
+
+        <div id="output"></div>
+        <div id="table"></div>
+
+        <script src="bag.js"></script>
+    </section>
+
+    <!-- 页脚 -->
+    <footer>
+        <p>&copy; 2024 0-1背包问题可视化</p>
+    </footer>
+</body>
+
+</html>

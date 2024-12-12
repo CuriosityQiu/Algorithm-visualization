@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liang-Barsky Clipping Algorithm Tutorial</title>
+  <style>
+      body {
+          font-family: 'Arial', sans-serif;
+          margin: 0;
+          padding: 0;
+          line-height: 1.6;
+          scroll-behavior: smooth;
+          background: linear-gradient(135deg, #696666, #121212);
+          color: #e0e0e0;
+      }
+      h1, h2, h3 {
+          text-align: center;
+          color: #81d4fa;
+      }
+
+      p {
+          text-align: justify;
+          padding: 0 20px;
+      }
+
+      a {
+          color: #64b5f6;
+          text-decoration: none;
+      }
+
+      a:hover {
+          text-decoration: underline;
+      }
+
+      /* 头部 */
+      header {
+          background: linear-gradient(135deg, #515454, #0d0000);
+          color: rgb(255, 255, 255);
+          padding: 20px 0;
+          text-align: center;
+          position: sticky;
+          top: 0;
+          z-index: 1000;
+          box-shadow: 0 3px 5px rgba(0, 0, 0, 0.5);
+      }
+      /*头部标题*/
+      header h1 {
+          margin: 0;
+          font-size: 2.5rem;
+      }
+
+      /*段节格式 */
+      section {
+          padding: 40px 20px;
+          max-width: 900px;
+          margin: 0 auto;
+          background: #1e1e1e;
+          border-radius: 10px;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+          margin-bottom: 30px;
+      }
+      /*段节标题*/
+      section h2 {
+          margin-bottom: 20px;
+      }
+      /*画布*/
+      canvas {
+          border: 1px solid #424242;
+          margin-top: 20px;
+          background-color: #121212;
+      }
+
+      #controls {
+          margin-top: 20px;
+          display: flex;
+          justify-content: center;
+          gap: 20px;
+      }
+
+      button {
+          padding: 10px 20px;
+          font-size: 16px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background 0.3s;
+      }
+
+      #drawButton {
+          background: #4caf50;
+          color: white;
+      }
+
+      #drawButton:hover {
+          background: #45a049;
+      }
+
+      #resetButton {
+          background: #f44336;
+          color: white;
+      }
+
+      #resetButton:hover {
+          background: #e53935;
+      }
+
+      /* 底端样式 */
+      footer {
+          text-align: center;
+          padding: 20px;
+          background: #212121;
+          color: #e0e0e0;
+          margin-top: 40px;
+          border-top: 1px solid #424242;
+      }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+      <h1>了解 Liang-Barsky 裁剪算法</h1>
+      <p>理解并掌握Liang-Barsky裁剪算法的交互式指南</p>
+  </header>
+
+  <!-- Introduction Section -->
+  <section>
+      <h2>什么是Liang-Barsky裁剪算法 ?</h2>
+      <p>
+          <span class="highlight">Liang-Barsky裁剪算法</span> 是一种高效的直线裁剪算法，用于确定一条直线在给定裁剪窗口内的可见部分。它通过计算直线的参数化表示与裁剪窗口边界的关系来实现裁剪。
+      </p>
+  </section>
+
+<!-- Charts Section -->
+<section>
+	<h2>Liang-Barsky裁剪算法的应用</h2>
+	<div class="chart-container">
+		<div class="chart-card">
+			<h3>用户界面设计</h3>
+			<p>在用户界面设计中，Liang-Barsky算法可以用来裁剪掉窗口或视图外的图形元素，确保用户只能看到他们应该看到的内容。</p>
+		</div>
+		<div class="chart-card">
+			<h3>计算机辅助设计（CAD）</h3>
+			<p>在CAD软件中，Liang-Barsky算法可以用来裁剪设计图纸上的线段，以便只显示设计者感兴趣的部分。</p>
+		</div>
+	</div>
+</section>
+
+<!-- Principles Section -->
+<section>
+	<h2>Liang-Barsky裁剪算法的主要思想</h2>
+	</p>
+	<p>1.我们用方程表示直线，其中t就是直线的斜率，t∈[0,1]：</p>
+	<img class="exe_picture" src="line1.png" >
+	<p>裁剪区域内部可以表达为两个不等式：</p>
+	<img class="exe_picture" src="line2.png" >
+	<p>把直线方程代入得到不等式：</span></p>
+	<img class="exe_picture" src="line3.png" >
+	</ol>
+	<p>2.把直线看成是一条有方向的线段，把窗口的四条边及其延长线分成两类：入边和出边</p>
+	<p>入边：左边界和下边界------从裁剪框外向裁剪框内</p>
+	<p>出边：右边界和上边界------从裁剪框内向裁剪框外</p>
+	<img class="out_picture" src="line4.png">
+	<p>3.分情况讨论</p>
+	<p>①d=0，q < 0,  说明直线与裁剪框平行，并且位于裁剪框的外面，直线为不可见，可抛弃，直接结束</p>
+	<p>q>=0，说明直线在它所平行的窗口边界的内部，还需进一步计算确定直线是否在窗口内、外、或者相交</p>
+	<p>②d < 0，说明直线是从裁剪边界的外部延伸到内部</p>
+	<p>③d>0,   说明直线是从裁剪边界的内部延伸到外部</p>
+	<p>对于d≠0，可以利用式子计算直线与边界k的交点的参数u。对于每条直线，可以计算直线位于裁剪窗口内线段的参数d1和d2</p>
+	<p> d1的值是由那些使得直线是从外部延伸到内部的窗口边界决定。对于这些边计算ri = qi/di.</p>
+	<p> d1 = max(ri,0)</p>
+	<p>d2的值是由那些使得直线是从内部延伸到窗口边界决定</p>
+	<p>d2 = min(ri,1)</p>
+	<p> 如果d1>d2,这条直线完全在窗口的外面，不可见，可抛弃，否则，根据参数u的两个值，计算出裁剪后线段的端点</p>
+</section>
+
+   <!-- Interactive Canvas Section -->
+ 	<section>
+	<h2>Liang-Barsky裁剪算法交互画布</h2>
+	<canvas id="clippingCanvas" width="900" height="600"></canvas>
+	<div id="controls">
+		<button id="resetButton">Reset</button>
+	</div>
+</section>
+
+  <!-- Footer -->
+  <footer>
+      <p>created by ljh.2024 Liang-Barsky Clipping Algorithm Interactive Tutorial</p>
+  </footer>
+
+  <script>
+      const canvas = document.getElementById('clippingCanvas');
+      const ctx = canvas.getContext('2d');
+      const resetButton = document.getElementById('resetButton');
+
+      let clippingWindow = { xMin: 300, yMin: 200, xMax: 600, yMax: 400 };
+      let linePoints = [];
+      let allLines = []; // 存储所有绘制的线段
+
+      // 绘制裁剪窗口
+      function drawClippingWindow() {
+          ctx.strokeStyle = 'blue';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(clippingWindow.xMin, clippingWindow.yMin, clippingWindow.xMax - clippingWindow.xMin, clippingWindow.yMax - clippingWindow.yMin);
+      }
+
+      // 绘制直线
+      function drawLine(points, color = 'white') {
+          if (points.length < 2) return;
+
+          ctx.beginPath();
+          ctx.moveTo(points[0].x, points[0].y);
+          ctx.lineTo(points[1].x, points[1].y);
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+      }
+
+      // Liang-Barsky裁剪算法
+      function liangBarsky(x1, y1, x2, y2) {
+          let dx = x2 - x1;
+          let dy = y2 - y1;
+          let p = [-dx, dx, -dy, dy];
+          let q = [x1 - clippingWindow.xMin, clippingWindow.xMax - x1, y1 - clippingWindow.yMin, clippingWindow.yMax - y1];
+          let u1 = 0, u2 = 1;
+
+          for (let i = 0; i < 4; i++) {
+              if (p[i] === 0) {
+                  if (q[i] < 0) return null;
+              } else {
+                  let r = q[i] / p[i];
+                  if (p[i] < 0) {
+                      u1 = Math.max(u1, r);
+                  } else {
+                      u2 = Math.min(u2, r);
+                  }
+              }
+          }
+
+          if (u1 > u2) return null;
+
+          let clippedX1 = x1 + u1 * dx;
+          let clippedY1 = y1 + u1 * dy;
+          let clippedX2 = x1 + u2 * dx;
+          let clippedY2 = y1 + u2 * dy;
+
+          return [{ x: clippedX1, y: clippedY1 }, { x: clippedX2, y: clippedY2 }];
+      }
+
+      // 重置画布
+      function resetCanvas() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          drawClippingWindow();
+          linePoints = [];
+          allLines = [];
+      }
+
+      // 绘制点
+       function drawPoint(x, y, color = 'red') {
+           ctx.beginPath();
+           ctx.arc(x, y, 5, 0, Math.PI * 2, false); // 设置点的半径为5
+           ctx.fillStyle = color;
+           ctx.fill();
+           ctx.closePath();
+       }
+
+      // 处理鼠标点击事件
+      canvas.addEventListener('click', (event) => {
+          const rect = canvas.getBoundingClientRect();
+          const x = event.clientX - rect.left;
+          const y = event.clientY - rect.top;
+
+          drawPoint(x,y)
+
+          if (linePoints.length < 2) {
+              linePoints.push({ x, y });
+              if (linePoints.length === 2) {
+                  drawLine(linePoints);
+                  let clippedLine = liangBarsky(linePoints[0].x, linePoints[0].y, linePoints[1].x, linePoints[1].y);
+                  if (clippedLine) {
+                      drawLine(clippedLine, 'green');
+                      allLines.push({ original: linePoints, clipped: clippedLine }); // 存储原始线段和裁剪后的线段
+                  }
+                  linePoints = []; // 重置线段点
+              }
+          }
+      });
+
+      resetButton.addEventListener('click', () => {
+          resetCanvas();
+          allLines.forEach(line => {
+              drawLine(line.original);
+              if (line.clipped) {
+                  drawLine(line.clipped, 'green');
+              }
+          });
+      });
+
+      // 初始化画布
+      resetCanvas();
+  </script>
+</body>
+</html>
