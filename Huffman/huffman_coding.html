@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>霍夫曼编码可视化</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f0f4f8;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #007bff;
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: url('https://www.toptal.com/designers/subtlepatterns/uploads/subtle_zebra_3d.png');
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .intro-section {
+      margin-bottom: 30px;
+    }
+
+    .intro-section h2 {
+      color: #333;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .intro-section h3 {
+      color: #444;
+      font-size: 22px;
+      margin-top: 20px;
+    }
+
+    .intro-section p {
+      font-size: 18px;
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    .intro-section ul {
+      margin-left: 20px;
+      font-size: 18px;
+    }
+
+    .intro-section li {
+      margin-bottom: 10px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-sizing: border-box;
+      background-color: #f9f9f9;
+    }
+
+    button {
+      padding: 12px 24px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    button:disabled {
+      background-color: #cccccc;
+    }
+
+    .output-section {
+      margin-top: 40px;
+      border-top: 2px solid #eee;
+      padding-top: 20px;
+    }
+
+    .tree-container {
+      margin-top: 20px;
+      overflow-x: auto;
+      overflow-y: auto;
+      text-align: center;
+      background: #f9f9f9;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      height: 300px;
+      max-width: 100%;
+    }
+
+    svg {
+      width: 100%;
+      height: auto;
+    }
+
+    .node {
+      font-size: 14px;
+      fill: #333;
+    }
+
+    .link {
+      stroke: #007bff;
+      stroke-width: 2;
+    }
+
+    .circle {
+      fill: #ff7f0e;
+      stroke: #d46f00;
+      stroke-width: 2;
+    }
+
+    .code-table {
+      width: 100%;
+      margin-top: 30px;
+      border-collapse: collapse;
+    }
+
+    .code-table th, .code-table td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+      font-size: 16px;
+    }
+
+    .code-table th {
+      background-color: #f2f2f2;
+      color: #444;
+    }
+
+    .encoded-string {
+      font-size: 18px;
+      font-family: 'Courier New', monospace;
+      margin-top: 20px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .intro-section h2 {
+        font-size: 24px;
+      }
+
+      .output-section {
+        margin-top: 30px;
+      }
+
+      .tree-container {
+        height: 300px;
+      }
+    }
+
+    footer {
+      margin-top: 50px;
+      font-size: 1em;
+      color: #aaaaaa;
+      text-align: center;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="intro-section">
+      <h1>霍夫曼编码可视化</h1>
+      <h2>什么是霍夫曼编码？</h2>
+      <p>霍夫曼编码是一种广泛使用的无损数据压缩算法。如果我们每个字符都采用相同长度的01编码来存储，将会是对存储资源的一种浪费，我们可以对常用的字符使用较短的编码，对于不常用的字符使用较长的编码，就可以实现使文件占用更少的存储空间。</p>
+      
+      <h3>霍夫曼编码的工作流程</h3>
+      <p>算法步骤：</p>
+      <ul>
+        <li><strong>Step 1:</strong> 计算输入字符串中每个字符的频率。</li>
+        <li><strong>Step 2:</strong> 根据每个字符的频率构建一个二叉树（霍夫曼树）</li>
+        <li><strong>Step 3:</strong> 根据每个字符在霍夫曼树中的位置，为其分配一个唯一的二进制代码。</li>
+        <li><strong>Step 4:</strong> 通过将每个字符替换为相应的二进制代码来对输入字符串进行编码。</li>
+      </ul>
+    </div>
+    <label for="inputString">输入要编码的字符串：</label>
+    <input type="text" id="inputString" placeholder="在此处键入字符串..." />
+    <button onclick="generateHuffman()">开始生成霍夫曼树</button>
+    <button id="nextStepButton" onclick="nextStep()" disabled>下一步</button>
+
+    <div class="output-section" id="outputSection" style="display: none;">
+      <h2>结果</h2>
+
+      
+      <h3>霍夫曼树</h3>
+      <div class="tree-container" id="treeContainer"></div>
+
+      
+      <h3>字符频率</h3>
+      <div id="frequencies"></div>
+
+      
+      <h3>霍夫曼编码</h3>
+      <table class="code-table" id="codeTable">
+        <thead>
+          <tr>
+            <th>字符</th>
+            <th>编码</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      
+      <h3>编码字符串</h3>
+      <div class="encoded-string" id="encodedString"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Created by QJC.2024 Huffman Coding Interactive Tutorial</p>
+  </footer>
+
+  <script>
+    class Node {
+      constructor(char, freq, left = null, right = null) {
+        this.char = char;
+        this.freq = freq;
+        this.left = left;
+        this.right = right;
+      }
+    }
+
+    let huffmanSteps = [];
+    let currentStep = 0;
+
+    function generateHuffman() {
+      const inputString = document.getElementById('inputString').value;
+      if (!inputString) {
+        alert('请输入要编码的字符串');
+        return;
+      }
+
+      const frequencies = calculateFrequencies(inputString);
+      const huffmanTree = buildHuffmanTree(frequencies);
+      const codes = generateCodes(huffmanTree);
+      const encodedString = encodeString(inputString, codes);
+
+      huffmanSteps = []; 
+      currentStep = 0;
+
+      
+      buildHuffmanSteps(frequencies);
+
+      displayResults(frequencies, huffmanTree, codes, encodedString);
+      displayStep();
+      document.getElementById('nextStepButton').disabled = false;
+    }
+
+    function calculateFrequencies(input) {
+      const freqMap = {};
+      for (let char of input) {
+        freqMap[char] = (freqMap[char] || 0) + 1;
+      }
+      return Object.entries(freqMap).map(([char, freq]) => new Node(char, freq));
+    }
+
+    function buildHuffmanTree(frequencies) {
+      const nodes = [...frequencies];
+      while (nodes.length > 1) {
+        nodes.sort((a, b) => a.freq - b.freq);
+        const left = nodes.shift();
+        const right = nodes.shift();
+        const newNode = new Node(null, left.freq + right.freq, left, right);
+        nodes.push(newNode);
+      }
+      return nodes[0];
+    }
+
+    function generateCodes(node, prefix = '', codes = {}) {
+      if (!node) return codes;
+      if (node.char !== null) {
+        codes[node.char] = prefix;
+      }
+      generateCodes(node.left, prefix + '0', codes);
+      generateCodes(node.right, prefix + '1', codes);
+      return codes;
+    }
+
+    function encodeString(input, codes) {
+      return input.split('').map(char => codes[char]).join('');
+    }
+
+    function buildHuffmanSteps(frequencies) {
+      let nodes = [...frequencies];
+      let steps = [];
+
+      while (nodes.length > 1) {
+        nodes.sort((a, b) => a.freq - b.freq);
+        const left = nodes.shift();
+        const right = nodes.shift();
+        const newNode = new Node(null, left.freq + right.freq, left, right);
+        nodes.push(newNode);
+
+        steps.push({
+          left: left,
+          right: right,
+          newNode: newNode,
+          remainingNodes: [...nodes] 
+        });
+      }
+
+      huffmanSteps = steps;
+    }
+
+    function displayResults(frequencies, tree, codes, encodedString) {
+      document.getElementById('outputSection').style.display = 'block';
+
+      
+      const treeContainer = document.getElementById('treeContainer');
+      treeContainer.innerHTML = '';
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      treeContainer.appendChild(svg);
+
+      
+      drawTree(tree, svg, 400, 20, 200);
+      svg.setAttribute('viewBox', '0 0 800 600');  
+
+      
+      const freqDiv = document.getElementById('frequencies');
+      freqDiv.innerHTML = frequencies
+        .map(node => `<div>${node.char || '␀'}: ${node.freq}</div>`)
+        .join('');
+
+      
+      const codeTableBody = document.querySelector('#codeTable tbody');
+      codeTableBody.innerHTML = '';
+      for (let [char, code] of Object.entries(codes)) {
+        const row = `<tr><td>${char === ' ' ? '␣ (space)' : char}</td><td>${code}</td></tr>`;
+        codeTableBody.insertAdjacentHTML('beforeend', row);
+      }
+
+      
+      document.getElementById('encodedString').textContent = encodedString;
+    }
+    //演示
+    function displayStep() {
+      if (currentStep >= huffmanSteps.length) {
+        alert('霍夫曼树生成完成');
+        document.getElementById('nextStepButton').disabled = true;
+        return;
+      }
+
+      const step = huffmanSteps[currentStep];
+      const treeContainer = document.getElementById('treeContainer');
+      treeContainer.innerHTML = '';
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      treeContainer.appendChild(svg);
+
+      
+      step.remainingNodes.forEach(node => drawTree(node, svg, 400, 20, 200));
+
+      svg.setAttribute('viewBox', '0 0 800 600'); 
+    }
+    //下一步响应函数
+    function nextStep() {
+      currentStep++;
+      displayStep();
+    }
+    //树
+    function drawTree(node, svg, x, y, spacing) {
+      if (!node) return;
+
+      if (node.left) {
+        const x1 = x - spacing;
+        const y1 = y + 50;
+        drawLine(svg, x, y, x1, y1);
+        drawTree(node.left, svg, x1, y1, spacing / 2);
+      }
+
+      if (node.right) {
+        const x2 = x + spacing;
+        const y2 = y + 50;
+        drawLine(svg, x, y, x2, y2);
+        drawTree(node.right, svg, x2, y2, spacing / 2);
+      }
+
+      drawNode(svg, x, y, node.char ? `${node.char} (${node.freq})` : `${node.freq}`);
+    }
+    //点
+    function drawNode(svg, x, y, text) {
+      const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', x);
+      circle.setAttribute('cy', y);
+      circle.setAttribute('r', 20);
+      circle.classList.add('circle');
+
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('x', x);
+      label.setAttribute('y', y + 4);
+      label.setAttribute('text-anchor', 'middle');
+      label.classList.add('node');
+      label.textContent = text;
+
+      group.appendChild(circle);
+      group.appendChild(label);
+      svg.appendChild(group);
+    }
+    //画线
+    function drawLine(svg, x1, y1, x2, y2) {
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', x1);
+      line.setAttribute('y1', y1);
+      line.setAttribute('x2', x2);
+      line.setAttribute('y2', y2);
+      line.classList.add('link');
+      svg.appendChild(line);
+    }
+  </script>
+</body>
+
+</html>

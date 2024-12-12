@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Bezier Curve Tutorial</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            scroll-behavior: smooth;
+            background: linear-gradient(135deg, #1a1a1a, #121212);
+            color: #e0e0e0;
+        }
+
+        h1,
+        h2,
+        h3 {
+            text-align: center;
+            color: #81d4fa;
+        }
+
+        p {
+            text-align: justify;
+            padding: 0 20px;
+        }
+
+        a {
+            color: #64b5f6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        header {
+            background: linear-gradient(135deg, #263238, #212121);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        header p {
+            margin: 5px 0 0;
+        }
+
+        section {
+            padding: 40px 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            background: #1e1e1e;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+        }
+
+        section h2 {
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            background: #2e2e2e;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #81d4fa;
+        }
+        .chart-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .chart-card {
+            width: 250px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #424242;
+            border-radius: 10px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
+            background: #2e2e2e;
+            transition: transform 0.3s;
+            color: #e0e0e0;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .chart-card img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        
+        canvas {
+            border: 1px solid #f1caca;
+            margin-top: 20px;
+            background-color: #f7d3d3;
+        }
+
+        #controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #fillButton {
+            background: #4caf50;
+            color: white;
+        }
+
+        #fillButton:hover {
+            background: #45a049;
+        }
+
+        #clearButton {
+            background: #f44336;
+            color: white;
+        }
+
+        #clearButton:hover {
+            background: #e53935;
+        }
+
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #212121;
+            color: #e0e0e0;
+            margin-top: 40px;
+            border-top: 1px solid #424242;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>X—扫描线填充算法</h1>
+    </header>
+
+    <section>
+        <h2>X—扫描线填充算法简介</h2>
+        <p>
+            <span class="highlight">X—扫描线填充算法</span>
+            是一种常用于多边形填充的算法。它通过一条水平的扫描线（可以理解为"扫描线"是Y轴上的某一水平切割面）从下往上移动，找出多边形与扫描线的交点，并决定哪些部分需要被填充。算法的核心思路是通过计算每条扫描线与多边形边缘的交点来决定哪些像素需要被填充。
+        </p>
+
+    </section>
+
+   
+    <section>
+        <h2>X—扫描线填充算法的运行过程</h2>
+
+        <ol>
+            <li><span class="highlight">确定多边形的边界</span> ：首先，需要了解多边形的边界信息（例如，顶点坐标）。通常，将顶点按照顺时针或逆时针顺序排列。</li>
+            <li><span class="highlight">生成扫描线与多边形交点</span> ：逐行扫描图像的每个水平线，计算扫描线与多边形的交点。每条边可能与扫描线有一个交点或没有交点，交点通常是连续的。</li>
+            <li><span class="highlight">排序交点</span> ：扫描线与多边形的每条边相交时，交点会形成一对起始点和结束点。我们需要对交点进行排序，确保从左到右依次填充。</li>
+            <li><span class="highlight">填充区域</span> ：根据排序后的交点，填充扫描线之间的区域，即扫描线下方的区域。</li>
+        </ol>
+
+    </section>
+
+    <section>
+        <div class="container">
+            <h1>X—扫描线可视化</h1> 
+            <canvas id="canvas" width="800" height="600"></canvas>
+            <div id="controls">
+                <button id="fillButton">填充</button>
+                <button id="clearButton">清除所有点</button>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; Lukie's X—扫描线填充算法可视化</p>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let polygon = [];
+        const filled = Array.from({ length: 600 }, () => Array(800).fill(0));
+        let currentY = 0;
+        const fillLineThickness = 3;
+
+        const applePoints = [{ x: 455, y: 200 }, { x: 457, y: 198 }, { x: 459, y: 198 }, { x: 460, y: 198 }, { x: 462, y: 198 }, { x: 464, y: 198 }, { x: 465, y: 198 }, { x: 467, y: 200 }, { x: 469, y: 200 }, { x: 470, y: 200 }, { x: 472, y: 200 }, { x: 474, y: 200 }, { x: 476, y: 200 }, { x: 477, y: 200 }, { x: 479, y: 202 }, { x: 481, y: 202 }, { x: 482, y: 202 }, { x: 484, y: 202 }, { x: 486, y: 204 }, { x: 487, y: 204 }, { x: 489, y: 204 }, { x: 491, y: 205 }, { x: 493, y: 205 }, { x: 494, y: 207 }, { x: 496, y: 207 }, { x: 498, y: 209 }, { x: 499, y: 209 }, { x: 501, y: 210 }, { x: 503, y: 210 }, { x: 504, y: 212 }, { x: 506, y: 214 }, { x: 508, y: 214 }, { x: 510, y: 215 }, { x: 511, y: 217 }, { x: 513, y: 219 }, { x: 515, y: 221 }, { x: 516, y: 222 }, { x: 518, y: 224 }, { x: 520, y: 226 }, { x: 521, y: 227 }, { x: 523, y: 229 }, { x: 525, y: 231 }, { x: 523, y: 232 }, { x: 521, y: 234 }, { x: 520, y: 234 }, { x: 518, y: 236 }, { x: 516, y: 238 }, { x: 515, y: 239 }, { x: 513, y: 241 }, { x: 511, y: 241 }, { x: 511, y: 243 }, { x: 510, y: 244 }, { x: 508, y: 246 }, { x: 506, y: 248 }, { x: 504, y: 249 }, { x: 504, y: 251 }, { x: 503, y: 253 }, { x: 501, y: 255 }, { x: 501, y: 256 }, { x: 499, y: 258 }, { x: 498, y: 260 }, { x: 498, y: 261 }, { x: 498, y: 263 }, { x: 496, y: 265 }, { x: 496, y: 266 }, { x: 494, y: 268 }, { x: 494, y: 270 }, { x: 494, y: 272 }, { x: 494, y: 273 }, { x: 493, y: 275 }, { x: 493, y: 277 }, { x: 493, y: 278 }, { x: 493, y: 280 }, { x: 493, y: 282 }, { x: 491, y: 283 }, { x: 491, y: 285 }, { x: 491, y: 287 }, { x: 491, y: 289 }, { x: 491, y: 290 }, { x: 491, y: 292 }, { x: 491, y: 294 }, { x: 491, y: 295 }, { x: 491, y: 297 }, { x: 491, y: 299 }, { x: 491, y: 300 }, { x: 493, y: 302 }, { x: 493, y: 304 }, { x: 493, y: 306 }, { x: 493, y: 307 }, { x: 494, y: 309 }, { x: 494, y: 311 }, { x: 494, y: 312 }, { x: 494, y: 314 }, { x: 496, y: 316 }, { x: 496, y: 317 }, { x: 498, y: 319 }, { x: 498, y: 321 }, { x: 499, y: 323 }, { x: 499, y: 324 }, { x: 501, y: 326 }, { x: 501, y: 328 }, { x: 503, y: 329 }, { x: 504, y: 331 }, { x: 504, y: 333 }, { x: 506, y: 334 }, { x: 508, y: 336 }, { x: 510, y: 338 }, { x: 511, y: 340 }, { x: 513, y: 341 }, { x: 515, y: 343 }, { x: 516, y: 345 }, { x: 518, y: 346 }, { x: 520, y: 348 }, { x: 521, y: 348 }, { x: 523, y: 350 }, { x: 525, y: 350 }, { x: 527, y: 351 }, { x: 528, y: 353 }, { x: 530, y: 353 }, { x: 532, y: 353 }, { x: 533, y: 355 }, { x: 533, y: 357 }, { x: 532, y: 358 }, { x: 532, y: 360 }, { x: 532, y: 362 }, { x: 530, y: 363 }, { x: 530, y: 365 }, { x: 528, y: 367 }, { x: 528, y: 368 }, { x: 528, y: 370 }, { x: 527, y: 372 }, { x: 527, y: 374 }, { x: 525, y: 375 }, { x: 525, y: 377 }, { x: 523, y: 379 }, { x: 523, y: 380 }, { x: 521, y: 382 }, { x: 521, y: 384 }, { x: 520, y: 385 }, { x: 520, y: 387 }, { x: 518, y: 389 }, { x: 516, y: 391 }, { x: 516, y: 392 }, { x: 515, y: 394 }, { x: 515, y: 396 }, { x: 513, y: 397 }, { x: 511, y: 399 }, { x: 511, y: 401 }, { x: 510, y: 402 }, { x: 508, y: 404 }, { x: 508, y: 406 }, { x: 506, y: 408 }, { x: 504, y: 409 }, { x: 503, y: 411 }, { x: 501, y: 413 }, { x: 501, y: 414 }, { x: 499, y: 416 }, { x: 498, y: 418 }, { x: 496, y: 419 }, { x: 494, y: 421 }, { x: 493, y: 423 }, { x: 491, y: 425 }, { x: 491, y: 426 }, { x: 489, y: 428 }, { x: 487, y: 430 }, { x: 486, y: 431 }, { x: 484, y: 431 }, { x: 482, y: 433 }, { x: 481, y: 435 }, { x: 479, y: 435 }, { x: 477, y: 436 }, { x: 476, y: 436 }, { x: 474, y: 438 }, { x: 472, y: 438 }, { x: 470, y: 438 }, { x: 469, y: 440 }, { x: 467, y: 440 }, { x: 465, y: 440 }, { x: 464, y: 440 }, { x: 462, y: 442 }, { x: 460, y: 442 }, { x: 459, y: 442 }, { x: 457, y: 442 }, { x: 455, y: 442 }, { x: 453, y: 442 }, { x: 452, y: 440 }, { x: 450, y: 440 }, { x: 448, y: 440 }, { x: 447, y: 440 }, { x: 445, y: 440 }, { x: 443, y: 438 }, { x: 442, y: 438 }, { x: 440, y: 438 }, { x: 438, y: 436 }, { x: 436, y: 436 }, { x: 435, y: 435 }, { x: 433, y: 435 }, { x: 431, y: 433 }, { x: 430, y: 433 }, { x: 428, y: 433 }, { x: 426, y: 431 }, { x: 425, y: 431 }, { x: 423, y: 431 }, { x: 421, y: 431 }, { x: 419, y: 431 }, { x: 418, y: 430 }, { x: 416, y: 430 }, { x: 414, y: 430 }, { x: 413, y: 430 }, { x: 411, y: 430 }, { x: 409, y: 430 }, { x: 408, y: 430 }, { x: 406, y: 430 }, { x: 404, y: 430 }, { x: 402, y: 430 }, { x: 401, y: 430 }, { x: 399, y: 430 }, { x: 397, y: 430 }, { x: 396, y: 431 }, { x: 394, y: 431 }, { x: 392, y: 431 }, { x: 391, y: 431 }, { x: 389, y: 433 }, { x: 387, y: 433 }, { x: 385, y: 433 }, { x: 384, y: 433 }, { x: 382, y: 435 }, { x: 380, y: 435 }, { x: 379, y: 436 }, { x: 377, y: 436 }, { x: 375, y: 438 }, { x: 374, y: 438 }, { x: 372, y: 438 }, { x: 370, y: 438 }, { x: 368, y: 440 }, { x: 367, y: 440 }, { x: 365, y: 440 }, { x: 363, y: 440 }, { x: 362, y: 440 }, { x: 360, y: 440 }, { x: 358, y: 440 }, { x: 357, y: 440 }, { x: 355, y: 440 }, { x: 353, y: 440 }, { x: 351, y: 440 }, { x: 350, y: 438 }, { x: 348, y: 438 }, { x: 346, y: 438 }, { x: 345, y: 438 }, { x: 343, y: 436 }, { x: 341, y: 436 }, { x: 340, y: 435 }, { x: 338, y: 435 }, { x: 336, y: 433 }, { x: 334, y: 431 }, { x: 333, y: 431 }, { x: 331, y: 430 }, { x: 329, y: 428 }, { x: 328, y: 426 }, { x: 326, y: 425 }, { x: 324, y: 423 }, { x: 323, y: 421 }, { x: 321, y: 419 }, { x: 321, y: 418 }, { x: 319, y: 416 }, { x: 317, y: 414 }, { x: 316, y: 413 }, { x: 314, y: 411 }, { x: 312, y: 409 }, { x: 312, y: 408 }, { x: 311, y: 406 }, { x: 309, y: 404 }, { x: 307, y: 402 }, { x: 307, y: 401 }, { x: 306, y: 399 }, { x: 304, y: 397 }, { x: 304, y: 396 }, { x: 302, y: 394 }, { x: 300, y: 392 }, { x: 300, y: 391 }, { x: 299, y: 389 }, { x: 299, y: 387 }, { x: 297, y: 385 }, { x: 297, y: 384 }, { x: 295, y: 382 }, { x: 295, y: 380 }, { x: 294, y: 379 }, { x: 294, y: 377 }, { x: 292, y: 375 }, { x: 292, y: 374 }, { x: 290, y: 372 }, { x: 290, y: 370 }, { x: 289, y: 368 }, { x: 289, y: 367 }, { x: 287, y: 365 }, { x: 287, y: 363 }, { x: 287, y: 362 }, { x: 285, y: 360 }, { x: 285, y: 358 }, { x: 285, y: 357 }, { x: 283, y: 355 }, { x: 283, y: 353 }, { x: 283, y: 351 }, { x: 282, y: 350 }, { x: 282, y: 348 }, { x: 282, y: 346 }, { x: 280, y: 345 }, { x: 280, y: 343 }, { x: 280, y: 341 }, { x: 280, y: 340 }, { x: 278, y: 338 }, { x: 278, y: 336 }, { x: 278, y: 334 }, { x: 278, y: 333 }, { x: 278, y: 331 }, { x: 277, y: 329 }, { x: 277, y: 328 }, { x: 277, y: 326 }, { x: 277, y: 324 }, { x: 277, y: 323 }, { x: 277, y: 321 }, { x: 275, y: 319 }, { x: 275, y: 317 }, { x: 275, y: 316 }, { x: 275, y: 314 }, { x: 275, y: 312 }, { x: 275, y: 311 }, { x: 275, y: 309 }, { x: 275, y: 307 }, { x: 275, y: 306 }, { x: 275, y: 304 }, { x: 275, y: 302 }, { x: 275, y: 300 }, { x: 275, y: 299 }, { x: 275, y: 297 }, { x: 275, y: 295 }, { x: 275, y: 294 }, { x: 275, y: 292 }, { x: 275, y: 290 }, { x: 275, y: 289 }, { x: 275, y: 287 }, { x: 275, y: 285 }, { x: 275, y: 283 }, { x: 275, y: 282 }, { x: 275, y: 280 }, { x: 275, y: 278 }, { x: 275, y: 277 }, { x: 275, y: 275 }, { x: 275, y: 273 }, { x: 275, y: 272 }, { x: 275, y: 270 }, { x: 277, y: 268 }, { x: 277, y: 266 }, { x: 277, y: 265 }, { x: 277, y: 263 }, { x: 277, y: 261 }, { x: 278, y: 260 }, { x: 278, y: 258 }, { x: 278, y: 256 }, { x: 280, y: 255 }, { x: 280, y: 253 }, { x: 280, y: 251 }, { x: 282, y: 249 }, { x: 282, y: 248 }, { x: 282, y: 246 }, { x: 283, y: 244 }, { x: 285, y: 243 }, { x: 285, y: 241 }, { x: 287, y: 239 }, { x: 287, y: 238 }, { x: 289, y: 236 }, { x: 290, y: 234 }, { x: 290, y: 232 }, { x: 292, y: 231 }, { x: 294, y: 229 }, { x: 295, y: 227 }, { x: 297, y: 226 }, { x: 299, y: 224 }, { x: 300, y: 222 }, { x: 302, y: 221 }, { x: 304, y: 219 }, { x: 306, y: 217 }, { x: 307, y: 215 }, { x: 309, y: 215 }, { x: 311, y: 214 }, { x: 312, y: 212 }, { x: 314, y: 212 }, { x: 316, y: 210 }, { x: 317, y: 210 }, { x: 319, y: 209 }, { x: 321, y: 207 }, { x: 323, y: 207 }, { x: 324, y: 207 }, { x: 326, y: 205 }, { x: 328, y: 205 }, { x: 329, y: 204 }, { x: 331, y: 204 }, { x: 333, y: 204 }, { x: 334, y: 202 }, { x: 336, y: 202 }, { x: 338, y: 202 }, { x: 340, y: 202 }, { x: 341, y: 202 }, { x: 343, y: 200 }, { x: 345, y: 200 }, { x: 346, y: 200 }, { x: 348, y: 200 }, { x: 350, y: 200 }, { x: 351, y: 200 }, { x: 353, y: 200 }, { x: 355, y: 200 }, { x: 357, y: 200 }, { x: 358, y: 200 }, { x: 360, y: 200 }, { x: 362, y: 200 }, { x: 363, y: 200 }, { x: 365, y: 200 }, { x: 367, y: 200 }, { x: 368, y: 202 }, { x: 370, y: 202 }, { x: 372, y: 202 }, { x: 374, y: 202 }, { x: 375, y: 202 }, { x: 377, y: 204 }, { x: 379, y: 204 }, { x: 380, y: 204 }, { x: 382, y: 205 }, { x: 384, y: 205 }, { x: 385, y: 207 }, { x: 387, y: 207 }, { x: 389, y: 207 }, { x: 391, y: 209 }, { x: 392, y: 210 }, { x: 394, y: 210 }, { x: 396, y: 212 }, { x: 397, y: 212 }, { x: 399, y: 214 }, { x: 401, y: 214 }, { x: 402, y: 214 }, { x: 404, y: 214 }, { x: 406, y: 214 }, { x: 408, y: 214 }, { x: 409, y: 214 }, { x: 411, y: 214 }, { x: 413, y: 214 }, { x: 414, y: 214 }, { x: 416, y: 212 }, { x: 418, y: 212 }, { x: 419, y: 210 }, { x: 421, y: 210 }, { x: 423, y: 209 }, { x: 425, y: 209 }, { x: 426, y: 207 }, { x: 428, y: 207 }, { x: 430, y: 205 }, { x: 431, y: 205 }, { x: 433, y: 204 }, { x: 435, y: 204 }, { x: 436, y: 204 }, { x: 438, y: 202 }, { x: 440, y: 202 }, { x: 442, y: 202 }, { x: 443, y: 202 }, { x: 445, y: 200 }, { x: 447, y: 200 }, { x: 448, y: 200 }, { x: 450, y: 200 }, { x: 452, y: 200 }, { x: 453, y: 200 }, { x: 457, y: 124 }, { x: 459, y: 122 }, { x: 460, y: 122 }, { x: 462, y: 122 }, { x: 464, y: 122 }, { x: 465, y: 122 }, { x: 467, y: 122 }, { x: 469, y: 124 }, { x: 469, y: 125 }, { x: 469, y: 127 }, { x: 469, y: 129 }, { x: 469, y: 130 }, { x: 469, y: 132 }, { x: 467, y: 134 }, { x: 467, y: 136 }, { x: 467, y: 137 }, { x: 467, y: 139 }, { x: 467, y: 141 }, { x: 465, y: 142 }, { x: 465, y: 144 }, { x: 465, y: 146 }, { x: 465, y: 147 }, { x: 464, y: 149 }, { x: 464, y: 151 }, { x: 462, y: 153 }, { x: 462, y: 154 }, { x: 462, y: 156 }, { x: 460, y: 158 }, { x: 460, y: 159 }, { x: 459, y: 161 }, { x: 459, y: 163 }, { x: 457, y: 164 }, { x: 455, y: 166 }, { x: 453, y: 168 }, { x: 453, y: 170 }, { x: 452, y: 171 }, { x: 450, y: 173 }, { x: 448, y: 175 }, { x: 447, y: 176 }, { x: 445, y: 178 }, { x: 443, y: 180 }, { x: 442, y: 181 }, { x: 440, y: 183 }, { x: 438, y: 185 }, { x: 436, y: 185 }, { x: 435, y: 187 }, { x: 433, y: 188 }, { x: 431, y: 188 }, { x: 430, y: 190 }, { x: 428, y: 190 }, { x: 426, y: 192 }, { x: 425, y: 192 }, { x: 423, y: 193 }, { x: 421, y: 193 }, { x: 419, y: 195 }, { x: 418, y: 195 }, { x: 416, y: 195 }, { x: 414, y: 197 }, { x: 413, y: 197 }, { x: 411, y: 197 }, { x: 409, y: 197 }, { x: 408, y: 198 }, { x: 406, y: 198 }, { x: 404, y: 198 }, { x: 402, y: 197 }, { x: 402, y: 195 }, { x: 402, y: 193 }, { x: 402, y: 192 }, { x: 402, y: 190 }, { x: 402, y: 188 }, { x: 402, y: 187 }, { x: 402, y: 185 }, { x: 404, y: 183 }, { x: 404, y: 181 }, { x: 404, y: 180 }, { x: 404, y: 178 }, { x: 404, y: 176 }, { x: 406, y: 175 }, { x: 406, y: 173 }, { x: 406, y: 171 }, { x: 408, y: 170 }, { x: 408, y: 168 }, { x: 409, y: 166 }, { x: 409, y: 164 }, { x: 409, y: 163 }, { x: 411, y: 161 }, { x: 411, y: 159 }, { x: 413, y: 158 }, { x: 414, y: 156 }, { x: 414, y: 154 }, { x: 416, y: 153 }, { x: 418, y: 151 }, { x: 418, y: 149 }, { x: 419, y: 147 }, { x: 421, y: 146 }, { x: 423, y: 144 }, { x: 425, y: 142 }, { x: 426, y: 141 }, { x: 428, y: 139 }, { x: 430, y: 137 }, { x: 431, y: 137 }, { x: 433, y: 136 }, { x: 435, y: 134 }, { x: 436, y: 132 }, { x: 438, y: 132 }, { x: 440, y: 130 }, { x: 442, y: 130 }, { x: 443, y: 129 }, { x: 445, y: 129 }, { x: 447, y: 127 }, { x: 448, y: 127 }, { x: 450, y: 125 }, { x: 452, y: 125 }, { x: 453, y: 124 }, { x: 455, y: 124 }];
+
+
+        let clickedPoints = []; // 存储点击的点
+
+        polygon = applePoints.slice();
+
+        function drawInitialBoat() {
+            ctx.clearRect(0, 0, 800, 600);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.beginPath();
+            polygon.forEach((point, index) => {
+                if (index === 0) {
+                    ctx.moveTo(point.x, point.y);
+                } else {
+                    ctx.lineTo(point.x, point.y);
+                }
+            });
+            ctx.closePath();
+            ctx.fill();
+
+            // 绘制之前点击的点
+            drawClickedPoints();
+        }
+
+        canvas.addEventListener('click', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            polygon.push({ x, y });
+            clickedPoints.push({ x, y }); // 添加到点击点中
+            drawPolygon();
+        });
+
+        function drawPolygon() {
+            ctx.clearRect(0, 0, 800, 600);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.beginPath();
+            polygon.forEach((point, index) => {
+                if (index === 0) {
+                    ctx.moveTo(point.x, point.y);
+                } else {
+                    ctx.lineTo(point.x, point.y);
+                }
+            });
+            ctx.closePath();
+            ctx.fill();
+
+            // 绘制之前点击的点
+            drawClickedPoints();
+        }
+
+        function drawClickedPoints() {
+            ctx.fillStyle = 'red'; // 设置颜色为红色
+            clickedPoints.forEach(point => {
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, 5, 0, Math.PI * 2); // 绘制圆形
+                ctx.fill();
+            });
+        }
+
+        function fillPolygon() {
+            filled.forEach(row => row.fill(0));
+           
+            // 获取多边形的最高点和最低点
+            const minY = Math.min(...polygon.map(point => point.y));
+            const maxY = Math.max(...polygon.map(point => point.y));
+            
+            // 将 currentY 初始化为最高点的 Y 坐标
+            currentY = minY;
+        
+            // 继续计算填充逻辑
+            for (let y = 0; y < 600; y++) {
+                let intersections = [];
+                for (let i = 0; i < polygon.length; i++) {
+                    const p1 = polygon[i];
+                    const p2 = polygon[(i + 1) % polygon.length];
+                    if ((p1.y <= y && p2.y > y) || (p2.y <= y && p1.y > y)) {
+                        const x = p1.x + (y - p1.y) * (p2.x - p1.x) / (p2.y - p1.y);
+                        intersections.push(x);
+                    }
+                }
+                intersections.sort((a, b) => a - b);
+                for (let j = 0; j < intersections.length; j += 2) {
+                    const xStart = Math.ceil(intersections[j]);
+                    const xEnd = Math.floor(intersections[j + 1]);
+                    for (let x = xStart; x <= xEnd; x++) {
+                        if (x >= 0 && x < 800 && y >= 0 && y < 600) {
+                            filled[y][x] = 1;
+                        }
+                    }
+                }
+            }
+        }      
+    
+
+        function drawFill() {
+            ctx.clearRect(0, 0, 800, 600);
+            drawPolygon();
+        
+            // 绘制扫描线
+            ctx.strokeStyle = 'yellow'; // 设置扫描线颜色为黄色
+            ctx.lineWidth = 2; // 设置线宽
+            ctx.beginPath();
+            ctx.moveTo(0, currentY); // 起点
+            ctx.lineTo(800, currentY); // 终点
+            ctx.stroke(); // 绘制线条
+        
+            for (let y = 0; y <= currentY; y += fillLineThickness) {  
+                for (let x = 0; x < 800; x++) {
+                    if (filled[y][x] === 1) {
+                        ctx.fillStyle = '#81d4fa';
+                        ctx.fillRect(x, y, 1, fillLineThickness);
+                    }
+                }
+            }
+        
+            currentY++;
+            if (currentY < 600) {
+                requestAnimationFrame(drawFill);
+            }
+        }
+        
+
+        document.getElementById('fillButton').addEventListener('click', () => {
+            fillPolygon();
+            drawFill();
+        });
+
+        document.getElementById('clearButton').addEventListener('click', () => {
+            polygon = [];
+            clickedPoints = []; // 清空之前点击的点
+            ctx.clearRect(0, 0, 800, 600);
+            drawInitialBoat();
+        });
+
+        drawInitialBoat();
+    </script>
+
+</body>
+
+</html>
